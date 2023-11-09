@@ -118,23 +118,40 @@ def main():
                 for titulo in titulos:
                     print(titulo)
         elif opcion == "6":
-            url = 'https://www.filmaffinity.com/es/topcat.php?id=2023films'
+            i=0
+            x=0
+            url = 'https://www.filmaffinity.com/es/ranking.php?rn=ranking_2023_topmovies'
             response = requests.get(url)
             soup = BeautifulSoup(response.content, 'html.parser')
-            movie_cards = soup.find_all('div', class_='cat-list')
+            movie_cards = soup.find_all('ul', id='top-movies')
 
-            for movie_cards in movie_cards:
+            for card in movie_cards:
+                div_titles = card.find_all('div', class_='mc-title')
+                ratings = card.find_all('div', class_='avg-rating')
 
-                title = movie_cards.find('div', class_='mc-right')
-                elemento_a = title.find('a', class_='nb')
+                for divtitle in div_titles:
+                    title = divtitle.find('a')
+                    titles = title.text.strip()
+                    print(f'Título: {titles}')
+                    for rate in ratings:
+                        if x==i:
+                            print(f'Rating: {rate.text.strip()}')
+                            print("--------------")
+                            i=i+1
+                            x = 0
+                            break
+                        else:
+                             x=x+1
 
-                # Extraer el atributo 'title' del elemento 'a'
-                if elemento_a:
-                    titulo = elemento_a.get('title')
-                    print(titulo)
-                else:
-                    print("No se encontró el elemento 'a' con la clase 'nb'.")
-                print(title)
+
+
+
+
+        elif opcion == "5":
+            print("Saliendo del programa...")
+            guardar_peliculas_en_json(peliculas)  # Guardamos la información de las películas en un archivo JSON
+            break  # Finaliza el bucle o la ejecución del programa
+
 
         elif opcion == "5":
             print("Saliendo del programa...")
