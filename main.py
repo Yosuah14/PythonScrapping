@@ -8,17 +8,20 @@ import json
 # Definimos el directorio donde se almacenarán las imágenes
 directorio_imagenes = 'imagenes_peliculas'
 # Esta función guarda la información de las películas en un archivo JSON y descargara las imágenes.
-def guardar_peliculas_en_json(peliculas):
+def guardar_peliculas_en_json(peliculas, directorio_imagenes='imagenes_peliculas'):
     # Comprobamos si el directorio de las imágenes ya existe, si no, lo creamos
     if not os.path.exists(directorio_imagenes):
         os.makedirs(directorio_imagenes)
+
     # Si ya existe el archivo 'datospeliculas.json', lo eliminamos
     if os.path.exists('datospeliculas.json'):
         os.remove('datospeliculas.json')
 
+    # Creamos un diccionario extra para almacenar todos los diccionarios de películas
+    diccionario_general = {"resultados": []}
+
     # Abrimos el archivo JSON para escritura y guardamos la información de las películas
     with open('datospeliculas.json', 'w') as archivo:
-        lista_peliculas = []
         for peli in peliculas:
             # Creamos un diccionario con la información de cada película
             peli_dict = {
@@ -29,9 +32,11 @@ def guardar_peliculas_en_json(peliculas):
                 "Sinopsis": peli.sinopsis,
                 "Director": peli.director,
                 "Reparto": peli.reparto,
-                "Valoracion":peli.rate
+                "Valoracion": peli.rate
             }
-            lista_peliculas.append(peli_dict)  # Agregamos cada película a la lista
+
+            # Agregamos cada película a la lista del diccionario extra
+            diccionario_general["peliculas"].append(peli_dict)
 
             # Descargamos y guardamos la imagen en el directorio de imágenes
             imagen_local = f"{directorio_imagenes}/{peli.titulo.replace(' ', '_')}.jpg"
@@ -39,8 +44,8 @@ def guardar_peliculas_en_json(peliculas):
                 img_file.write(requests.get(peli.imagen).content)  # Descargamos y escribimos la imagen
                 print(f"Imagen descargada: {imagen_local}")  # Imprimimos la ruta de la imagen descargada
 
-        # Escribimos la lista de películas en el archivo JSON
-        json.dump(lista_peliculas, archivo)
+        # Escribimos el diccionario extra en el archivo JSON
+        json.dump(diccionario_general, archivo)
 
 # Esta función elimina el directorio de imágenes si existe
 
