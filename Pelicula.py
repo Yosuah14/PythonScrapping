@@ -90,6 +90,70 @@ class Pelicula:
 
         return peliculas  # Devuelve la lista de películas obtenidas
 
+
+def obtener_peliculas_desde_url_python(cls):
+    # Método de clase para obtener información de películas desde Filmaffinity
+    url = 'https://www.filmaffinity.com/es/rdcat.php?id=new_th_es'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')  # Analiza el HTML de la página
+
+    movie_cards = soup.find_all('div', class_='movie-card')  # Encuentra todas los carteles de película
+
+    peliculas = []  # Lista para almacenar objetos Pelicula
+
+    for movie_card in movie_cards:
+        #coge la id de la peli
+        data_movie_id = movie_card.get('data-movie-id')
+        if data_movie_id:
+            # como el url de la peli es siempre el mismo mas el id se mete
+            movie_url = f"https://www.filmaffinity.com/es/film{data_movie_id}.html"
+            response_movie = requests.get(movie_url)
+            soup_movie = BeautifulSoup(response_movie.content, 'html.parser')
+            rate_container = soup_movie.find('div', {'id': 'movie-rat-avg'})
+            if rate_container:
+                rate = rate_container.text.strip()  # Obtener la valoración
+            else:
+                rate = "No disponible"  # Manejo en caso de no encontrar la valoración
+
+            # Con la nueva direccion nos metemos en la informacion de la pelicula
+            movie_info = soup_movie.find('dl', class_='movie-info')
+            if movie_info:
+                # Extrae información detallada de la película (título, fecha, géneros, sinopsis, etc.)
+                title = movie_info.find('dt', string='Título original').find_next('dd').text.strip()
+                year = movie_info.find('dt', string='Año').find_next('dd').text.strip()
+                release_date_day = soup_movie.find('div', id='movie-categories').strong.get_text(strip=True)
+                # Como la fecha aparece arriba a la derecha del cartel de dos formas distintas
+                if "/" in release_date_day:
+                    # A esta no le añadimos el year de la pelcula ya que ya se puede sacar del formato en el que viene 13/10/2023
+                    release_date = f"{release_date_day}"
+                else:
+                    #Aqui si lo añadimos
+                    release_date = f"{release_date_day} {year}"
+                #Convertimos la fecha segun el formato
+                release_date = convertir_fecha(release_date, year)
+                #Sacamos todos los generos
+                genres = [genre.text for genre in
+                          movie_info.find('dt', string='Género').find_next('dd').find_all('a')]
+                synopsis = movie_info.find('dt', string='Sinopsis').find_next('dd').text.strip()
+                director = movie_info.find('dt', string='Dirección').find_next('dd').text.strip()
+                #Comprobamos si tiene actores y sacamos todos los que participan
+                reparto_block = movie_info.find('dt', string='Reparto')
+                if reparto_block:
+                    actor_links = reparto_block.find_next('dd').find_all('a', title=True)
+                    actor_names = [actor['title'] for actor in actor_links]
+                else:
+                    actor_names = ["Información del reparto no encontrada"]
+                #Sacamos la imagen
+                movie_main_image = soup_movie.find('div', id='movie-main-image-container')
+                if movie_main_image:
+                    image_url = movie_main_image.find('img')['src']
+                    # Crea un objeto Pelicula con los datos recopilados y lo agrega a la lista de películas
+                    nueva_pelicula = cls(title, release_date, image_url, genres, synopsis, director, actor_names,rate)
+                    peliculas.append(nueva_pelicula)
+
+    return peliculas  # Devuelve la lista de películas obtenidas
+
+
 def convertir_fecha(release_date, year):
     # Función para convertir la fecha al formato datetime
     if "/" in release_date:
@@ -127,6 +191,8 @@ def traducir_mes(mes):
     }
 
     return equivalencias.get(mes.lower(), mes)
+
+
 
 
 

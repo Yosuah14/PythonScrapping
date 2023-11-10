@@ -1,19 +1,12 @@
-from datetime import datetime
 
 from bs4 import BeautifulSoup
-import discord
-from discord.ext import commands
-
 from Pelicula import Pelicula
 import requests
 import os
 import shutil
 import json
-from discord_easy_commands import EasyBot
-
 # Definimos el directorio donde se almacenarán las imágenes
 directorio_imagenes = 'imagenes_peliculas'
-
 # Esta función guarda la información de las películas en un archivo JSON y descargara las imágenes.
 def guardar_peliculas_en_json(peliculas):
     # Comprobamos si el directorio de las imágenes ya existe, si no, lo creamos
@@ -35,7 +28,8 @@ def guardar_peliculas_en_json(peliculas):
                 "Géneros": peli.generos,
                 "Sinopsis": peli.sinopsis,
                 "Director": peli.director,
-                "Reparto": peli.reparto
+                "Reparto": peli.reparto,
+                "Valoracion":peli.rate
             }
             lista_peliculas.append(peli_dict)  # Agregamos cada película a la lista
 
@@ -64,11 +58,10 @@ def main():
     while True:
         print("------ MENÚ ------")
         print("1. Mostrar películas ordenadas por fecha de lanzamiento (más reciente a más antigua)")
-        print("2. Mostrar películas en orden normal")
-        print("3. Mostrar películas ordenadas por puntuacion")
-        print("4. Mostrar películas ordenadas por genero")
-        print("5. Mostrar mejores películas del año ordenadas por puntuacion")
-        print("6. Salir")
+        print("2. Mostrar películas ordenadas por puntuacion")
+        print("3. Mostrar películas ordenadas por genero")
+        print("4. Mostrar mejores películas del año ordenadas por puntuacion")
+        print("5. Salir")
         opcion = input("Elige una opción: ")
 
         if opcion == "1":
@@ -77,10 +70,6 @@ def main():
             for peli in peliculas_ordenadas:
                 peli.imprimir_info()
         elif opcion == "2":
-            # Mostramos las películas en su orden original
-            for peli in peliculas:
-                peli.imprimir_info()
-        elif opcion == "3":
             # Crear un diccionario para almacenar las películas por día
             peliculas_por_dia = {}
 
@@ -103,7 +92,7 @@ def main():
                 print(f"Fecha: {fecha}")
                 for peli_info in peliculas:
                     print(f"Película: {peli_info[0]}, Puntuación: {peli_info[1]}")
-        elif opcion == "4":
+        elif opcion == "3":
             # Creamos un diccionario para almacenar las películas por género
             peliculas_por_genero = {}
 
@@ -126,7 +115,7 @@ def main():
                 print(f"--- Películas de género {genero} ---")
                 for titulo in titulos:
                     print(titulo)
-        elif opcion == "5":
+        elif opcion == "4":
             i=0
             x=0
             url = 'https://www.filmaffinity.com/es/ranking.php?rn=ranking_2023_topmovies'
@@ -152,7 +141,7 @@ def main():
                         else:
                              x=x+1
 
-        elif opcion == "6":
+        elif opcion == "5":
             print("Saliendo del programa...")
             guardar_peliculas_en_json(peliculas)  # Guardamos la información de las películas en un archivo JSON
             break  # Finaliza el bucle o la ejecución del programa

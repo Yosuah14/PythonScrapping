@@ -1,16 +1,13 @@
-import asyncio
 import os
+import asyncio
 from datetime import datetime
-
 import discord
 from discord.ext import commands
-from discord_easy_commands import EasyBot
-
-from Pelicula import Pelicula
+from Pelicula import Pelicula  # Asegúrate de importar correctamente tu clase Pelicula
 
 async def mostrar_peliculas(ctx):
     # Lógica para mostrar películas
-    peliculas = Pelicula.obtener_peliculas_desde_url()
+    peliculas = Pelicula.obtener_peliculas_desde_url_python()
     fecha_actual = datetime.now().strftime('%Y-%m-%d')
     peliculas_hoy = [peli for peli in peliculas if peli.fecha_lanzamiento.strftime('%Y-%m-%d') == fecha_actual]
 
@@ -26,33 +23,28 @@ async def mostrar_peliculas(ctx):
     await ctx.send(mensaje_peliculas)
 
 async def enviar_mensaje_discord():
-    TOKEN = os.environ.get('DISCORD_TOKEN')
-    code_chanel = 845032532814987295
+    from dotenv import load_dotenv
+    load_dotenv()
+    TOKEN = os.getenv('DISCORD_TOKEN')
+    code_channel = 845032532814987295
 
     if TOKEN:
         intents = discord.Intents.default()
-
         # Crear una instancia del bot de Discord
         bot = commands.Bot(command_prefix='!', intents=intents)
-
         # Configurar el comando !peliculas para que llame a la función mostrar_peliculas
         bot.add_command(commands.Command(mostrar_peliculas, name='peliculas'))
-
         # Iniciar el bot
         await bot.start(TOKEN)
-
         # Esperar a que el bot esté listo antes de enviar el mensaje
         await bot.wait_until_ready()
-
         # Obtener el canal de Discord por ID
-        canal = bot.get_channel(code_chanel)
-
+        canal = bot.get_channel(code_channel)
         if canal:
             # Enviar el mensaje en el canal especificado
             await mostrar_peliculas(canal)
         else:
-            print(f"No se encontró el canal con ID {code_chanel}.")
-
+            print(f"No se encontró el canal con ID {code_channel}.")
         # Cerrar la conexión del bot
         await bot.close()
     else:
