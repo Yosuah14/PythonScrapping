@@ -1,10 +1,15 @@
+from datetime import datetime
+
 from bs4 import BeautifulSoup
+import discord
+from discord.ext import commands
 
 from Pelicula import Pelicula
 import requests
 import os
 import shutil
 import json
+from discord_easy_commands import EasyBot
 
 # Definimos el directorio donde se almacenarán las imágenes
 directorio_imagenes = 'imagenes_peliculas'
@@ -44,14 +49,17 @@ def guardar_peliculas_en_json(peliculas):
         json.dump(lista_peliculas, archivo)
 
 # Esta función elimina el directorio de imágenes si existe
+
 def limpiar_directorio():
     if os.path.exists(directorio_imagenes):
         shutil.rmtree(directorio_imagenes)
 
 # Función principal
 def main():
+    TOKEN = os.environ.get('DISCORD_TOKEN')
     limpiar_directorio()  # Limpiamos el directorio de imágenes antes de descargar las nuevas películas para que no se repitan
     peliculas = Pelicula.obtener_peliculas_desde_url()  # Obtenemos las películas desde una URL
+    YOUR_CHANNEL_ID = '845032532814987295'
 
     while True:
         print("------ MENÚ ------")
@@ -59,7 +67,8 @@ def main():
         print("2. Mostrar películas en orden normal")
         print("3. Mostrar películas ordenadas por puntuacion")
         print("4. Mostrar películas ordenadas por genero")
-        print("5. Salir")
+        print("5. Mostrar mejores películas del año ordenadas por puntuacion")
+        print("6. Salir")
         opcion = input("Elige una opción: ")
 
         if opcion == "1":
@@ -117,7 +126,7 @@ def main():
                 print(f"--- Películas de género {genero} ---")
                 for titulo in titulos:
                     print(titulo)
-        elif opcion == "6":
+        elif opcion == "5":
             i=0
             x=0
             url = 'https://www.filmaffinity.com/es/ranking.php?rn=ranking_2023_topmovies'
@@ -143,23 +152,13 @@ def main():
                         else:
                              x=x+1
 
-
-
-
-
-        elif opcion == "5":
+        elif opcion == "6":
             print("Saliendo del programa...")
             guardar_peliculas_en_json(peliculas)  # Guardamos la información de las películas en un archivo JSON
             break  # Finaliza el bucle o la ejecución del programa
 
 
-        elif opcion == "5":
-            print("Saliendo del programa...")
-            guardar_peliculas_en_json(peliculas)  # Guardamos la información de las películas en un archivo JSON
-            break
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-
 #  ejecutamos el main
 
 main()
+#845032532814987295
